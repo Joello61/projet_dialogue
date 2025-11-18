@@ -62,6 +62,12 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
+        <!-- Thymeleaf extras pour Spring Security 6 -->
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        </dependency>
+
         <!-- PostgreSQL -->
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -180,20 +186,45 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven.surefire.version}</version>
                 <configuration>
+                    <!-- FORCER l'utilisation de src/test/resources/application.properties -->
+                    <systemPropertyVariables>
+                        <!-- Force l'utilisation de H2 -->
+                        <spring.datasource.driver-class-name>org.h2.Driver</spring.datasource.driver-class-name>
+                        <spring.datasource.url>jdbc:h2:mem:testdb</spring.datasource.url>
+                        <spring.datasource.username>sa</spring.datasource.username>
+                        <spring.datasource.password></spring.datasource.password>
+                        <spring.jpa.database-platform>org.hibernate.dialect.H2Dialect</spring.jpa.database-platform>
+                        <spring.jpa.hibernate.ddl-auto>create-drop</spring.jpa.hibernate.ddl-auto>
+                    </systemPropertyVariables>
+
                     <includes>
                         <include>${test.includes}</include>
                     </includes>
                     <parallel>methods</parallel>
                     <threadCount>4</threadCount>
                     <useSystemClassLoader>false</useSystemClassLoader>
+
+                    <!-- Argument JVM pour logger les erreurs -->
+                    <argLine>-Xmx512m</argLine>
                 </configuration>
             </plugin>
 
-            <!-- Failsafe (tests d’intégration) -->
+            <!-- Failsafe (tests d'intégration) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>${maven.failsafe.version}</version>
+                <configuration>
+                    <!-- Même configuration que Surefire pour H2 -->
+                    <systemPropertyVariables>
+                        <spring.datasource.driver-class-name>org.h2.Driver</spring.datasource.driver-class-name>
+                        <spring.datasource.url>jdbc:h2:mem:testdb</spring.datasource.url>
+                        <spring.datasource.username>sa</spring.datasource.username>
+                        <spring.datasource.password></spring.datasource.password>
+                        <spring.jpa.database-platform>org.hibernate.dialect.H2Dialect</spring.jpa.database-platform>
+                        <spring.jpa.hibernate.ddl-auto>create-drop</spring.jpa.hibernate.ddl-auto>
+                    </systemPropertyVariables>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
