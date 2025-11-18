@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+
+<th:block th:replace="~{layout :: layout(~{::content})}">
+
+    <th:block th:fragment="content">
+
+        <div class="container py-5">
+
+            <div class="text-center my-5">
+
+                <h1 class="display-5 fw-bold mb-3">
+                    Bienvenue sur <span class="text-primary">Dialogue</span>
+                </h1>
+
+                <p class="lead text-muted mx-auto" style="max-width: 650px;">
+                    Un espace de conversation visuelle inspiré de
+                    <strong>“Dialogue on Instagram”</strong>, où les utilisateurs créent
+                    des échanges poétiques à travers des images.
+                </p>
+
+                <div class="mt-4">
+                    <a class="btn btn-primary btn-lg px-4" th:href="@{/login}">
+                        <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                    </a>
+
+                    <a class="btn btn-outline-secondary btn-lg px-4 ms-2" th:href="@{/register}">
+                        <i class="bi bi-person-plus"></i> S'inscrire
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </th:block>
+
+</th:block>
+
+</html>

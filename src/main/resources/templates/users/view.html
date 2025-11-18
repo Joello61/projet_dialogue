@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+
+<th:block th:replace="~{layout :: layout(~{::content})}">
+
+    <th:block th:fragment="content">
+
+        <div class="container py-5">
+
+            <!-- Profil -->
+            <div class="text-center mb-5">
+
+                <i class="bi bi-person-circle text-primary" style="font-size: 5rem;"></i>
+
+                <h2 class="fw-bold mt-3">
+                    Profil de <span th:text="${user.username}">Utilisateur</span>
+                </h2>
+
+                <p class="text-muted">
+                    Membre de la plateforme Dialogue
+                </p>
+            </div>
+
+            <!-- Action card -->
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+
+                    <div class="card shadow-sm p-4 text-center">
+
+                        <h4 class="mb-3">
+                            <i class="bi bi-chat-left-text text-success"></i>
+                            Démarrer une conversation
+                        </h4>
+
+                        <p class="text-muted">
+                            Engagez une conversation visuelle en envoyant des photos et messages.
+                        </p>
+
+                        <a th:href="@{'/conversations/with/' + ${user.id}}"
+                           class="btn btn-success btn-lg mt-2">
+                            <i class="bi bi-arrow-right-circle"></i>
+                            Commencer le dialogue
+                        </a>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Back -->
+            <div class="text-center mt-4">
+                <a href="/user" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour à la liste
+                </a>
+            </div>
+
+        </div>
+
+    </th:block>
+
+</th:block>
+
+</html>

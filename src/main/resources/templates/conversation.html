@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+
+<th:block th:replace="~{layout :: layout(~{::content})}">
+
+    <th:block th:fragment="content">
+
+        <div class="container py-4">
+
+            <!-- HEADER -->
+            <div class="d-flex align-items-center mb-4">
+                <a href="/conversations" class="btn btn-outline-secondary btn-sm me-3">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+
+                <h3 class="fw-bold mb-0" th:text="${otherUser.username}">
+                    Nom utilisateur
+                </h3>
+            </div>
+
+            <!-- MESSAGES LIST -->
+            <div id="messages-container"
+                 class="border rounded p-3 mb-3 bg-light"
+                 style="height: 60vh; overflow-y: auto;">
+
+                <div th:each="msg : ${messages}"
+                     class="d-flex mb-3"
+                     th:classappend="${msg.sender.id == currentUser.id}
+                                        ? 'justify-content-end'
+                                        : 'justify-content-start'">
+
+                    <div th:class="'p-2 rounded shadow-sm ' +
+                           (${msg.sender.id == currentUser.id}
+                                ? 'bg-primary text-white'
+                                : 'bg-white')"
+                         style="max-width: 70%;">
+
+                        <!-- TEXTE -->
+                        <div th:if="${msg.text != null}">
+                            <span th:text="${msg.text}">Message texte</span>
+                        </div>
+
+                        <!-- IMAGE -->
+                        <div th:if="${msg.photo != null and msg.photo.url != null}" class="mt-2">
+                            <img th:src="@{${msg.photo.url}}"
+                                 class="img-fluid rounded"
+                                 style="max-height: 200px; cursor:pointer;"
+                                 onclick="window.open(this.src, '_blank')"  alt="photo"/>
+                        </div>
+
+                        <div class="text-end mt-1">
+                            <small class="opacity-75" th:text="${#temporals.format(msg.createdAt, 'HH:mm')}">
+                                10:21
+                            </small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- SEND MESSAGE FORM -->
+            <form action="#" th:action="@{'/conversation/' + ${conversation.id} + '/send'}"
+                  method="post"
+                  enctype="multipart/form-data"
+                  id="messageForm">
+
+                <!-- PRÉVISUALISATION DE L'IMAGE -->
+                <div id="imagePreviewContainer" class="mb-2" style="display: none;">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-2 d-flex align-items-center gap-2">
+                            <img id="imagePreview"
+                                 src=""
+                                 alt="Prévisualisation"
+                                 class="rounded"
+                                 style="max-height: 100px; max-width: 150px; object-fit: cover;">
+                            <div class="flex-grow-1">
+                                <p class="mb-0 small text-muted" id="imageName">nom_fichier.jpg</p>
+                                <p class="mb-0 small text-muted" id="imageSize">Taille: 0 KB</p>
+                            </div>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger"
+                                    id="removeImage"
+                                    title="Supprimer l'image">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <!-- TEXT -->
+                    <input type="text"
+                           name="text"
+                           id="textInput"
+                           class="form-control"
+                           placeholder="Votre message..."
+                           autocomplete="off">
+
+                    <!-- IMAGE (caché visuellement, déclenché par le bouton) -->
+                    <input type="file"
+                           name="image"
+                           id="imageInput"
+                           accept="image/*"
+                           class="d-none">
+
+                    <!-- BOUTON POUR SÉLECTIONNER UNE IMAGE -->
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            id="selectImageBtn"
+                            title="Joindre une image">
+                        <i class="bi bi-image"></i>
+                    </button>
+
+                    <!-- SUBMIT -->
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+        <!-- Scroll auto en bas -->
+        <script>
+            const box = document.getElementById('messages-container');
+            box.scrollTop = box.scrollHeight;
+        </script>
+
+        <!-- Script de prévisualisation d'image -->
+        <script>
+            const imageInput = document.getElementById('imageInput');
+            const selectImageBtn = document.getElementById('selectImageBtn');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+            const imageName = document.getElementById('imageName');
+            const imageSize = document.getElementById('imageSize');
+            const removeImageBtn = document.getElementById('removeImage');
+            const messageForm = document.getElementById('messageForm');
+
+            // Ouvrir le sélecteur de fichier quand on clique sur le bouton
+            selectImageBtn.addEventListener('click', () => {
+                imageInput.click();
+            });
+
+            // Prévisualiser l'image sélectionnée
+            imageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+
+                if (file) {
+                    // Vérifier que c'est bien une image
+                    if (!file.type.startsWith('image/')) {
+                        alert('Veuillez sélectionner une image valide');
+                        imageInput.value = '';
+                        return;
+                    }
+
+                    // Vérifier la taille (max 10MB par exemple)
+                    const maxSize = 10 * 1024 * 1024; // 10MB
+                    if (file.size > maxSize) {
+                        alert('L\'image est trop volumineuse (max 10MB)');
+                        imageInput.value = '';
+                        return;
+                    }
+
+                    // Créer une URL temporaire pour prévisualiser l'image
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        imagePreview.src = event.target.result;
+                        imageName.textContent = file.name;
+                        imageSize.textContent = `Taille: ${(file.size / 1024).toFixed(1)} KB`;
+                        imagePreviewContainer.style.display = 'block';
+
+                        // Changer l'icône du bouton
+                        selectImageBtn.innerHTML = '<i class="bi bi-image-fill text-primary"></i>';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Supprimer l'image sélectionnée
+            removeImageBtn.addEventListener('click', () => {
+                imageInput.value = '';
+                imagePreviewContainer.style.display = 'none';
+                imagePreview.src = '';
+                selectImageBtn.innerHTML = '<i class="bi bi-image"></i>';
+            });
+
+            // Réinitialiser après envoi du formulaire
+            messageForm.addEventListener('submit', () => {
+                // Laisser un petit délai pour que le formulaire soit envoyé
+                setTimeout(() => {
+                    imageInput.value = '';
+                    imagePreviewContainer.style.display = 'none';
+                    selectImageBtn.innerHTML = '<i class="bi bi-image"></i>';
+                }, 100);
+            });
+        </script>
+
+    </th:block>
+</th:block>
+
+</html>
