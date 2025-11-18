@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven 3.9.9'   // Adapter selon ton Jenkins
-        jdk 'JDK 21'
-    }
-
     environment {
         MAVEN_OPTS = '-Xmx1024m'
     }
